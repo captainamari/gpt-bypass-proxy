@@ -1,0 +1,118 @@
+
+===== OS / Kernel =====
+$ uname -a
+Linux racknerd-a80966 4.15.0-20-generic #21-Ubuntu SMP Tue Apr 24 06:16:15 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+$ grep PRETTY_NAME /etc/os-release || cat /etc/os-release || true
+PRETTY_NAME="Ubuntu 18.04 LTS"
+
+===== CPU / Memory =====
+$ lscpu | head -n 20
+Architecture:        x86_64
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Little Endian
+CPU(s):              1
+On-line CPU(s) list: 0
+Thread(s) per core:  1
+Core(s) per socket:  1
+Socket(s):           1
+NUMA node(s):        1
+Vendor ID:           GenuineIntel
+CPU family:          6
+Model:               62
+Model name:          Intel(R) Xeon(R) CPU E5-2680 v2 @ 2.80GHz
+Stepping:            4
+CPU MHz:             2799.998
+BogoMIPS:            5599.99
+Hypervisor vendor:   KVM
+Virtualization type: full
+L1d cache:           32K
+L1i cache:           32K
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           985M         96M        668M        4.3M        220M        751M
+Swap:          1.0G          0B        1.0G
+$ uptime
+ 07:20:52 up 36 min,  1 user,  load average: 0.04, 0.01, 0.00
+
+===== Disk =====
+$ df -hT | sed -n '1,10p'
+Filesystem     Type      Size  Used Avail Use% Mounted on
+udev           devtmpfs  482M     0  482M   0% /dev
+tmpfs          tmpfs      99M  4.4M   95M   5% /run
+/dev/vda1      ext4       16G  3.9G   12G  26% /
+tmpfs          tmpfs     493M     0  493M   0% /dev/shm
+tmpfs          tmpfs     5.0M     0  5.0M   0% /run/lock
+tmpfs          tmpfs     493M     0  493M   0% /sys/fs/cgroup
+tmpfs          tmpfs      99M     0   99M   0% /run/user/0
+
+===== Network Interfaces / IP =====
+$ ip addr show | sed -n '1,200p'
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 00:16:3c:d3:c1:26 brd ff:ff:ff:ff:ff:ff
+    inet 107.174.180.231/24 brd 107.174.180.255 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::216:3cff:fed3:c126/64 scope link 
+       valid_lft forever preferred_lft forever
+3: docker0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc noqueue state DOWN group default 
+    link/ether 02:42:68:41:83:10 brd ff:ff:ff:ff:ff:ff
+    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+
+===== Open Ports (listening) =====
+$ ss -ltnp | sed -n '1,200p' || netstat -tulpn 2>/dev/null | sed -n '1,200p'
+State    Recv-Q    Send-Q        Local Address:Port        Peer Address:Port                                                                                    
+LISTEN   0         128               127.0.0.1:44641            0.0.0.0:*        users:(("ss-server",pid=531,fd=5))                                             
+LISTEN   0         128           127.0.0.53%lo:53               0.0.0.0:*        users:(("systemd-resolve",pid=289,fd=13))                                      
+LISTEN   0         128                 0.0.0.0:8086             0.0.0.0:*        users:(("obfs-server",pid=537,fd=6))                                           
+LISTEN   0         128                 0.0.0.0:22               0.0.0.0:*        users:(("sshd",pid=530,fd=3))                                                  
+LISTEN   0         128                    [::]:22                  [::]:*        users:(("sshd",pid=530,fd=4))                                                  
+
+===== Firewall (ufw/iptables) =====
+$ sudo ufw status || ufw status || true
+sudo: ufw: command not found
+scripts/collect_sys_info.sh: line 8: ufw: command not found
+$ sudo iptables -L -n | head -n 50 || iptables -L -n | head -n 50 || true
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+ACCEPT     udp  --  0.0.0.0/0            0.0.0.0/0            udp dpt:8086
+ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0            tcp dpt:8086
+ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0            tcp dpt:22
+
+Chain FORWARD (policy DROP)
+target     prot opt source               destination         
+DOCKER-USER  all  --  0.0.0.0/0            0.0.0.0/0           
+DOCKER-ISOLATION-STAGE-1  all  --  0.0.0.0/0            0.0.0.0/0           
+ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0            ctstate RELATED,ESTABLISHED
+DOCKER     all  --  0.0.0.0/0            0.0.0.0/0           
+ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           
+ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain DOCKER (1 references)
+target     prot opt source               destination         
+
+Chain DOCKER-ISOLATION-STAGE-1 (1 references)
+target     prot opt source               destination         
+DOCKER-ISOLATION-STAGE-2  all  --  0.0.0.0/0            0.0.0.0/0           
+RETURN     all  --  0.0.0.0/0            0.0.0.0/0           
+
+Chain DOCKER-ISOLATION-STAGE-2 (1 references)
+target     prot opt source               destination         
+DROP       all  --  0.0.0.0/0            0.0.0.0/0           
+RETURN     all  --  0.0.0.0/0            0.0.0.0/0           
+
+Chain DOCKER-USER (1 references)
+target     prot opt source               destination         
+RETURN     all  --  0.0.0.0/0            0.0.0.0/0           
+
+===== Package Managers =====
+$ which apt yum dnf zypper apk | tr ' ' '\n'
+/usr/bin/apt
