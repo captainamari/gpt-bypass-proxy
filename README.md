@@ -22,7 +22,7 @@
 - HTTPS 请求（`server.on('connect')`）
   - 解析 `CONNECT host:port` → 校验白名单 → `net.connect` 建立 TCP 隧道 → 双向 `pipe`
 
-## 端到端数据流（E2E）
+## 端到端数据流
 
 ```text
 Chrome(含 PAC) / 其它客户端
@@ -137,20 +137,6 @@ curl -x http://localhost:10800 https://chatgpt.com -I
   - `scripts/deploy.sh`：在 Linux 上部署为 systemd + PM2（偏传统部署）
   - `scripts/deploy_docker_oneclick.sh`：一键 Docker 部署
   - `scripts/update_docker_online.sh`：在线更新/回滚镜像并重建容器
-
-## 安全建议
-
-Forward Proxy 一旦暴露公网，很容易被滥用；强烈建议至少做到：
-
-- 用云厂商安全组/防火墙限制来源 IP（只允许你自己/扩展用户访问）
-- 严格维护 `ALLOWED_DOMAINS`（不要放开到 `*`）
-- 合理设置限流参数，观察 `LOG_DIR` 下的日志
-
-更强的限制手段（按优先级从“最推荐/最有效”到“需要改造”）：
-
-- 网络层白名单：只开放给固定公网 IP 段；或仅监听内网/VPC，通过 VPN/堡垒机/隧道访问
-- 入口再加一层网关：用 Nginx/Traefik 做 `allow/deny`、mTLS、或基于 Header 的鉴权（适合自建客户端）
-- 增加代理鉴权：实现 `Proxy-Authorization`（Basic/Bearer）校验（需客户端/浏览器确实会带该头，且 CONNECT 也要校验）
 
 ## License
 
