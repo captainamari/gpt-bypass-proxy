@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  gpt-bypass-proxy:
+    build: .
+    container_name: gpt-bypass-proxy
+    restart: unless-stopped
+    ports:
+      - "10800:10800"
+    environment:
+      - NODE_ENV=production
+      - PORT=10800
+      - HOST=0.0.0.0
+      - LOG_LEVEL=info
+      - ENABLE_METRICS=false
+      - ENABLE_CORS=true
+      - CORS_ORIGIN=*
+      - RATE_LIMIT_MAX_REQUESTS=1000
+      - PROXY_TIMEOUT=30000
+      - ENABLE_ADMIN_API=false
+    volumes:
+      - ./logs:/app/logs
+      - ./config:/app/config:ro
+    networks:
+      - gpt-bypass-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:10800/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # Optional: Nginx reverse proxy for SSL termination
+  nginx:
+    image: nginx:alpine
+    container_name: gpt-bypass-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - gpt-bypass-proxy
+    networks:
+      - gpt-bypass-network
+    profiles:
+      - with-nginx
+
+  # Optional: Redis for advanced caching
+  redis:
+    image: redis:alpine
+    container_name: gpt-bypass-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - gpt-bypass-network
+    profiles:
+      - with-redis
+
+networks:
+  gpt-bypass-network:
+    driver: bridge
+
+volumes:
+  redis-data:

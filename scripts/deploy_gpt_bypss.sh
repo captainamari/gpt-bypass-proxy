@@ -80,7 +80,7 @@ EOF
 install_deps(){
   log "安装生产依赖..."
   cd "${APP_DIR}"
-  npm ci --only=production
+  npm install --omit=dev
 }
 
 setup_process(){
