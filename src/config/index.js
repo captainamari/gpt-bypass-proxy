@@ -18,7 +18,7 @@ const config = {
     maxConnections: parseInt(process.env.MAX_CONNECTIONS) || 1000,
     keepAliveTimeout: parseInt(process.env.KEEP_ALIVE_TIMEOUT) || 5000,
     allowedDomains: (process.env.ALLOWED_DOMAINS || 
-      'openai.com,*.openai.com,chatgpt.com,*.chatgpt.com,claude.ai,*.claude.ai,anthropic.com,*.anthropic.com,coze.com,*.coze.com,gemini.google.com,*.gemini.google.com,aistudio.google.com,*.aistudio.google.com,x.ai,*.x.ai,meta.ai,*.meta.ai,grok.com,*.grok.com'
+      'openai.com,*.openai.com,chatgpt.com,*.chatgpt.com,oaistatic.com,*.oaistatic.com,oaiusercontent.com,*.oaiusercontent.com,claude.ai,*.claude.ai,anthropic.com,*.anthropic.com,coze.com,*.coze.com,gemini.google.com,*.gemini.google.com,aistudio.google.com,*.aistudio.google.com,x.ai,*.x.ai,meta.ai,*.meta.ai,grok.com,*.grok.com'
     ).split(',').map(d => d.trim())
   },
 
@@ -27,6 +27,10 @@ const config = {
     corsOrigin: process.env.CORS_ORIGIN || '*',
     rateLimitWindowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000, // 15 minutes
     rateLimitMaxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 1000
+  },
+
+  auth: {
+    password: process.env.PROXY_AUTH_PASSWORD
   },
 
   logging: {

@@ -6,6 +6,7 @@ IMAGE_TAG="${IMAGE_TAG:-gpt-bypass-proxy:local}"
 PORT="${PORT:-10800}"
 HOST_IP="${HOST_IP:-$(hostname -I 2>/dev/null | awk '{print $1}')}"
 ADMIN_TOKEN="${ADMIN_TOKEN:-$(openssl rand -hex 24 2>/dev/null || head -c 24 /dev/urandom | xxd -p)}"
+PROXY_AUTH_PASSWORD="${PROXY_AUTH_PASSWORD:-$(openssl rand -hex 8 2>/dev/null || head -c 8 /dev/urandom | xxd -p)}"
 ALLOWED_DOMAINS="${ALLOWED_DOMAINS:-openai.com,chatgpt.com,claude.ai,gemini.google.com,anthropic.com,coze.com,x.ai,meta.ai,aistudio.google.com,grok.com}"
 ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-false}"
 ENABLE_METRICS="${ENABLE_METRICS:-false}"
@@ -57,6 +58,7 @@ run_container() {
     -p "${PORT}:${PORT}" \
     -e PORT="${PORT}" \
     -e HOST=0.0.0.0 \
+    -e PROXY_AUTH_PASSWORD="${PROXY_AUTH_PASSWORD}" \
     -e ADMIN_TOKEN="${ADMIN_TOKEN}" \
     -e ENABLE_ADMIN_API="${ENABLE_ADMIN_API}" \
     -e ENABLE_METRICS="${ENABLE_METRICS}" \
@@ -75,8 +77,9 @@ print_summary() {
 Deployment complete.
 - Public IP: ${ip}
 - Proxy port: ${PORT}
+- Proxy Password: ${PROXY_AUTH_PASSWORD}
 - Admin API: ${ENABLE_ADMIN_API} (token: ${ADMIN_TOKEN})
-- Set the Chrome extension `proxyServer` as: ${ip}:${PORT}
+- Set the Chrome extension proxy as: ${ip}:${PORT}
 - Health check: curl http://127.0.0.1:${PORT}/health
 - Logs: docker logs -f ${APP_NAME}
 

@@ -6,6 +6,7 @@ APP_DIR="/opt/gpt-bypass-proxy"
 REPO_URL="https://github.com/gpt-bypass/proxy-server.git"
 PORT="10800"
 ADMIN_TOKEN="$(openssl rand -hex 24 2>/dev/null || head -c 24 /dev/urandom | xxd -p)"
+PROXY_AUTH_PASSWORD="$(openssl rand -hex 8 2>/dev/null || head -c 8 /dev/urandom | xxd -p)"
 ALLOWED_DOMAINS="openai.com,chatgpt.com,claude.ai,gemini.google.com,anthropic.com,coze.com,x.ai,meta.ai,aistudio.google.com,grok.com"
 
 log(){ echo -e "\e[34m[INFO]\e[0m $*"; }
@@ -71,6 +72,7 @@ CACHE_TTL=300
 CACHE_MAX_KEYS=10000
 ALLOWED_DOMAINS=${ALLOWED_DOMAINS}
 ADMIN_TOKEN=${ADMIN_TOKEN}
+PROXY_AUTH_PASSWORD=${PROXY_AUTH_PASSWORD}
 ENABLE_ADMIN_API=true
 SSL_ENABLED=false
 DB_ENABLED=false
@@ -116,6 +118,7 @@ print_summary(){
 
 部署完成！
 - 监听端口: ${PORT}
+- 代理认证密码: ${PROXY_AUTH_PASSWORD}
 - 管理令牌: ${ADMIN_TOKEN}
 - 健康检查: curl http://$(hostname -I | awk '{print $1}'):${PORT}/health
 - 管理接口示例: curl -H "Authorization: Bearer ${ADMIN_TOKEN}" http://$(hostname -I | awk '{print $1}'):${PORT}/admin/status

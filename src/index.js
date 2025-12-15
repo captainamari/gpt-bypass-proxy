@@ -61,9 +61,23 @@ function createAllowedDomainMatcher() {
 const isAllowedDomain = createAllowedDomainMatcher();
 
 function getClientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string' && forwarded.length) return forwarded.split(',')[0].trim();
+  // const forwarded = req.headers['x-forwarded-for'];
+  // if (typeof forwarded === 'string' && forwarded.length) return forwarded.split(',')[0].trim();
   return req.socket?.remoteAddress || 'unknown';
+}
+
+function checkProxyAuth(req) {
+  if (!config.auth.password) return true;
+
+  const authHeader = req.headers['proxy-authorization'];
+  if (!authHeader) return false;
+
+  const [type, credentials] = authHeader.split(' ');
+  if (type !== 'Basic' || !credentials) return false;
+
+  const [user, pass] = Buffer.from(credentials, 'base64').toString().split(':');
+  // We don't enforce username, only password
+  return pass === config.auth.password;
 }
 
 function stripConnectionListedHeaders(headers) {
@@ -201,9 +215,16 @@ async function requestHandler(req, res) {
       status: 'ok',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      allowedDomains: config.proxy.allowedDomains?.length || 0
+      allowedDomains: config.proxy.allowedDomains?.length || 0,
+      authEnabled: !!config.auth.password
     });
     writeSimpleResponse(res, 200, payload, 'application/json; charset=utf-8');
+    return;
+  }
+
+  if (!checkProxyAuth(req)) {
+    res.writeHead(407, { 'Proxy-Authenticate': 'Basic realm="GPT Bypass Proxy"' });
+    res.end('Proxy Authentication Required');
     return;
   }
 
@@ -219,6 +240,11 @@ async function requestHandler(req, res) {
 }
 
 async function connectHandler(req, clientSocket, head) {
+  if (!checkProxyAuth(req)) {
+    writeConnectError(clientSocket, 407, 'Proxy Authentication Required');
+    return;
+  }
+
   try {
     await enforceRateLimit(req);
   } catch {

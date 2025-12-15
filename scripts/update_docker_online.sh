@@ -48,12 +48,14 @@ get_container_env() {
 collect_runtime_env() {
   PORT="${PORT:-$(get_container_env PORT)}"
   ADMIN_TOKEN="${ADMIN_TOKEN:-$(get_container_env ADMIN_TOKEN)}"
+  PROXY_AUTH_PASSWORD="${PROXY_AUTH_PASSWORD:-$(get_container_env PROXY_AUTH_PASSWORD)}"
   ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-$(get_container_env ENABLE_ADMIN_API)}"
   ENABLE_METRICS="${ENABLE_METRICS:-$(get_container_env ENABLE_METRICS)}"
   ALLOWED_DOMAINS="${ALLOWED_DOMAINS:-$(get_container_env ALLOWED_DOMAINS)}"
 
   [[ -n "${PORT:-}" ]] || { err "PORT is empty (set PORT or ensure ${APP_NAME} exists)"; exit 1; }
   [[ -n "${ADMIN_TOKEN:-}" ]] || { err "ADMIN_TOKEN is empty (set ADMIN_TOKEN or ensure ${APP_NAME} exists)"; exit 1; }
+  [[ -n "${PROXY_AUTH_PASSWORD:-}" ]] || { warn "PROXY_AUTH_PASSWORD is empty; proxy might be open to public if not intended."; }
 
   ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-false}"
   ENABLE_METRICS="${ENABLE_METRICS:-false}"
@@ -104,6 +106,7 @@ recreate_container_with_image() {
     -p "${PORT}:${PORT}" \
     -e PORT="${PORT}" \
     -e HOST=0.0.0.0 \
+    -e PROXY_AUTH_PASSWORD="${PROXY_AUTH_PASSWORD}" \
     -e ADMIN_TOKEN="${ADMIN_TOKEN}" \
     -e ENABLE_ADMIN_API="${ENABLE_ADMIN_API}" \
     -e ENABLE_METRICS="${ENABLE_METRICS}" \
