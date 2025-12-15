@@ -8,6 +8,7 @@
 
 import http from 'http';
 import https from 'https';
+import dns from 'dns';
 import net from 'net';
 import { URL } from 'url';
 import dotenv from 'dotenv';
@@ -110,16 +111,19 @@ function writeSimpleResponse(res, statusCode, body, contentType = 'text/plain; c
 
 function writeConnectError(clientSocket, statusCode, message) {
   const body = message ? `${message}\n` : '';
-  clientSocket.write(
+  const response =
     `HTTP/1.1 ${statusCode} ${http.STATUS_CODES[statusCode] || 'Error'}\r\n` +
-      'Proxy-Agent: GPT-Bypass-Proxy\r\n' +
-      'Content-Type: text/plain; charset=utf-8\r\n' +
-      `Content-Length: ${Buffer.byteLength(body)}\r\n` +
-      'Connection: close\r\n' +
-      '\r\n' +
-      body
-  );
-  clientSocket.destroy();
+    'Proxy-Agent: GPT-Bypass-Proxy\r\n' +
+    'Content-Type: text/plain; charset=utf-8\r\n' +
+    `Content-Length: ${Buffer.byteLength(body)}\r\n` +
+    'Connection: close\r\n' +
+    '\r\n' +
+    body;
+  try {
+    clientSocket.end(response);
+  } catch {
+    clientSocket.destroy();
+  }
 }
 
 function parseConnectHostPort(authority) {
@@ -258,6 +262,11 @@ async function connectHandler(req, clientSocket, head) {
 }
 
 function start() {
+  if (typeof dns.setDefaultResultOrder === 'function') {
+    const order = process.env.DNS_RESULT_ORDER;
+    if (order === 'ipv4first' || order === 'verbatim') dns.setDefaultResultOrder(order);
+  }
+
   const server = http.createServer((req, res) => {
     requestHandler(req, res).catch((err) => {
       logger.error('Request handler error', err);
