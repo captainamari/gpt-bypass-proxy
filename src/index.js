@@ -31,6 +31,24 @@ const hopByHopHeaders = new Set([
   'upgrade'
 ]);
 
+// Headers that might reveal client IP or proxy usage
+const sensitiveHeaders = new Set([
+  'x-forwarded-for',
+  'x-real-ip',
+  'forwarded',
+  'via',
+  'x-client-ip',
+  'client-ip',
+  'cf-connecting-ip',
+  'fastly-client-ip',
+  'true-client-ip',
+  'x-cluster-client-ip',
+  'x-forwarded',
+  'forwarded-for',
+  'x-forwarded-proto', // Sometimes reveals protocol, usually harmless but safer to strip
+  'priority' // HTTP/2 priority header, sometimes causes issues with HTTP/1.1 upstreams
+]);
+
 function normalizeHost(host) {
   if (!host) return null;
   const withoutProtocol = host.toLowerCase().replace(/^https?:\/\//, '');
@@ -61,6 +79,8 @@ function createAllowedDomainMatcher() {
 const isAllowedDomain = createAllowedDomainMatcher();
 
 function getClientIp(req) {
+  // Security: Prefer remoteAddress to avoid X-Forwarded-For spoofing unless behind a trusted proxy
+  // For this standalone deployment, we trust the direct connection IP.
   // const forwarded = req.headers['x-forwarded-for'];
   // if (typeof forwarded === 'string' && forwarded.length) return forwarded.split(',')[0].trim();
   return req.socket?.remoteAddress || 'unknown';
@@ -96,7 +116,10 @@ function sanitizeRequestHeaders(originalHeaders, targetHostHeader) {
   stripConnectionListedHeaders(headers);
 
   for (const name of Object.keys(headers)) {
-    if (hopByHopHeaders.has(name.toLowerCase())) delete headers[name];
+    const lower = name.toLowerCase();
+    if (hopByHopHeaders.has(lower) || sensitiveHeaders.has(lower)) {
+      delete headers[name];
+    }
   }
 
   headers.host = targetHostHeader;
