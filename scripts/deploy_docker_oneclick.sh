@@ -6,7 +6,7 @@ IMAGE_TAG="${IMAGE_TAG:-gpt-bypass-proxy:local}"
 PORT="${PORT:-10800}"
 HOST_IP="${HOST_IP:-$(hostname -I 2>/dev/null | awk '{print $1}')}"
 ADMIN_TOKEN="${ADMIN_TOKEN:-$(openssl rand -hex 24 2>/dev/null || head -c 24 /dev/urandom | xxd -p)}"
-ALLOWED_DOMAINS="${ALLOWED_DOMAINS:-openai.com,chatgpt.com,claude.ai,gemini.google.com,anthropic.com,coze.com,x.ai,meta.ai,aistudio.google.com,grok.com}"
+ALLOWED_DOMAINS="${ALLOWED_DOMAINS:-openai.com,*.openai.com,chatgpt.com,*.chatgpt.com,oaistatic.com,*.oaistatic.com,cdn.oaistatic.com,cdn.openai.com,fonts.googleapis.com,fonts.gstatic.com,claude.ai,*.claude.ai,gemini.google.com,*.gemini.google.com,anthropic.com,*.anthropic.com,coze.com,*.coze.com,x.ai,*.x.ai,meta.ai,*.meta.ai,aistudio.google.com,*.aistudio.google.com,grok.com,*.grok.com}"
 ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-false}"
 ENABLE_METRICS="${ENABLE_METRICS:-false}"
 

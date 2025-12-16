@@ -6,7 +6,7 @@ APP_DIR="/opt/gpt-bypass-proxy"
 REPO_URL="https://github.com/gpt-bypass/proxy-server.git"
 PORT="10800"
 ADMIN_TOKEN="$(openssl rand -hex 24 2>/dev/null || head -c 24 /dev/urandom | xxd -p)"
-ALLOWED_DOMAINS="openai.com,chatgpt.com,claude.ai,gemini.google.com,anthropic.com,coze.com,x.ai,meta.ai,aistudio.google.com,grok.com"
+ALLOWED_DOMAINS="openai.com,*.openai.com,chatgpt.com,*.chatgpt.com,oaistatic.com,*.oaistatic.com,cdn.oaistatic.com,cdn.openai.com,fonts.googleapis.com,fonts.gstatic.com,claude.ai,*.claude.ai,gemini.google.com,*.gemini.google.com,anthropic.com,*.anthropic.com,coze.com,*.coze.com,x.ai,*.x.ai,meta.ai,*.meta.ai,aistudio.google.com,*.aistudio.google.com,grok.com,*.grok.com"
 
 log(){ echo -e "\e[34m[INFO]\e[0m $*"; }
 warn(){ echo -e "\e[33m[WARN]\e[0m $*"; }
