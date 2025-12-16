@@ -17,9 +17,38 @@ const config = {
     timeout: parseInt(process.env.PROXY_TIMEOUT) || 30000,
     maxConnections: parseInt(process.env.MAX_CONNECTIONS) || 1000,
     keepAliveTimeout: parseInt(process.env.KEEP_ALIVE_TIMEOUT) || 5000,
-    allowedDomains: (process.env.ALLOWED_DOMAINS || 
-      'openai.com,*.openai.com,chatgpt.com,*.chatgpt.com,oaistatic.com,*.oaistatic.com,oaiusercontent.com,*.oaiusercontent.com,azureedge.net,*.azureedge.net,auth0.com,*.auth0.com,statsig.com,*.statsig.com,statsigapi.net,*.statsigapi.net,intercom.io,*.intercom.io,intercomcdn.com,*.intercomcdn.com,gravatar.com,*.gravatar.com,featuregates.org,*.featuregates.org,cdn.oaistatic.com,cdn.openai.com,fonts.googleapis.com,fonts.gstatic.com,claude.ai,*.claude.ai,anthropic.com,*.anthropic.com,usefathom.com,*.usefathom.com,coze.com,*.coze.com,google.com,*.google.com,gemini.google.com,*.gemini.google.com,aistudio.google.com,*.aistudio.google.com,accounts.google.com,*.accounts.google.com,googleapis.com,*.googleapis.com,gstatic.com,*.gstatic.com,googleusercontent.com,*.googleusercontent.com,x.ai,*.x.ai,meta.ai,*.meta.ai,grok.com,*.grok.com'
-    ).split(',').map(d => d.trim())
+    allowedDomains: (process.env.ALLOWED_DOMAINS || [
+      'openai.com', '*.openai.com',
+      'chatgpt.com', '*.chatgpt.com',
+      'oaistatic.com', '*.oaistatic.com',
+      'oaiusercontent.com', '*.oaiusercontent.com',
+      'azureedge.net', '*.azureedge.net',
+      'auth0.com', '*.auth0.com',
+      'statsig.com', '*.statsig.com',
+      'statsigapi.net', '*.statsigapi.net',
+      'intercom.io', '*.intercom.io',
+      'intercomcdn.com', '*.intercomcdn.com',
+      'gravatar.com', '*.gravatar.com',
+      'featuregates.org', '*.featuregates.org',
+      'cdn.oaistatic.com', 'cdn.openai.com',
+      'fonts.googleapis.com', 'fonts.gstatic.com',
+      'claude.ai', '*.claude.ai',
+      'anthropic.com', '*.anthropic.com',
+      'usefathom.com', '*.usefathom.com',
+      'coze.com', '*.coze.com',
+      'google.com', '*.google.com',
+      'gemini.google.com', '*.gemini.google.com',
+      'aistudio.google.com', '*.aistudio.google.com',
+      'accounts.google.com', '*.accounts.google.com',
+      'googleapis.com', '*.googleapis.com',
+      'gstatic.com', '*.gstatic.com',
+      'googleusercontent.com', '*.googleusercontent.com',
+      'x.ai', '*.x.ai',
+      'meta.ai', '*.meta.ai',
+      'grok.com', '*.grok.com',
+      // 'cloudflare.com', '*.cloudflare.com', // ⚠️ 开启此项可能导致 Cloudflare 人机验证失败，仅在独立浏览器环境建议开启
+      'challenges.cloudflare.com',          // ⚠️ Gemini 镜像站通常需要此域名走代理
+    ].join(',')).split(',').map(d => d.trim())
   },
 
   security: {
