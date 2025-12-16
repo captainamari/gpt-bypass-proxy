@@ -48,6 +48,7 @@ const config = {
       'grok.com', '*.grok.com',
       'cloudflare.com', '*.cloudflare.com', // ⚠️ 开启此项可能导致 Cloudflare 人机验证失败，仅在独立浏览器环境建议开启
       'challenges.cloudflare.com',          // ⚠️ Gemini 镜像站通常需要此域名走代理
+      '*.challenges.cloudflare.com',        // ⚠️ for Gemini
     ].join(',')).split(',').map(d => d.trim())
   },
 
