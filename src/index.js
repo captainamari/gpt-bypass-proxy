@@ -50,10 +50,15 @@ function createAllowedDomainMatcher() {
   return (host) => {
     const normalized = normalizeHost(host);
     if (!normalized) return false;
+    
+    // Check for exact match
     if (exact.has(normalized)) return true;
+    
+    // Check for wildcard match (suffix match)
     for (const base of wildcards) {
       if (normalized === base || normalized.endsWith(`.${base}`)) return true;
     }
+    
     return false;
   };
 }
@@ -158,6 +163,7 @@ function handleHttpProxyRequest(req, res) {
 
   const hostname = targetUrl.hostname;
   if (!isAllowedDomain(hostname)) {
+    logger.warn('Blocked HTTP request', { url: req.url, hostname, ip: getClientIp(req) });
     writeSimpleResponse(res, 403, `Forbidden: domain not allowed (${hostname})`);
     return;
   }
@@ -201,7 +207,7 @@ async function requestHandler(req, res) {
       status: 'ok',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      allowedDomains: config.proxy.allowedDomains?.length || 0
+      allowedDomains: config.proxy.allowedDomains
     });
     writeSimpleResponse(res, 200, payload, 'application/json; charset=utf-8');
     return;
@@ -234,6 +240,7 @@ async function connectHandler(req, clientSocket, head) {
 
   const hostname = normalizeHost(parsed.host);
   if (!isAllowedDomain(hostname)) {
+    logger.warn('Blocked CONNECT request', { url: req.url, hostname, ip: getClientIp(req) });
     writeConnectError(clientSocket, 403, `Forbidden: domain not allowed (${hostname})`);
     return;
   }
