@@ -48,15 +48,16 @@ get_container_env() {
 collect_runtime_env() {
   PORT="${PORT:-$(get_container_env PORT)}"
   ADMIN_TOKEN="${ADMIN_TOKEN:-$(get_container_env ADMIN_TOKEN)}"
-  ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-$(get_container_env ENABLE_ADMIN_API)}"
-  ENABLE_METRICS="${ENABLE_METRICS:-$(get_container_env ENABLE_METRICS)}"
-  ALLOWED_DOMAINS="${ALLOWED_DOMAINS:-$(get_container_env ALLOWED_DOMAINS)}"
+  
+  # ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-$(get_container_env ENABLE_ADMIN_API)}"
+  # ENABLE_METRICS="${ENABLE_METRICS:-$(get_container_env ENABLE_METRICS)}"
+  # ALLOWED_DOMAINS="${ALLOWED_DOMAINS:-$(get_container_env ALLOWED_DOMAINS)}"
 
   [[ -n "${PORT:-}" ]] || { err "PORT is empty (set PORT or ensure ${APP_NAME} exists)"; exit 1; }
   [[ -n "${ADMIN_TOKEN:-}" ]] || { err "ADMIN_TOKEN is empty (set ADMIN_TOKEN or ensure ${APP_NAME} exists)"; exit 1; }
 
-  ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-false}"
-  ENABLE_METRICS="${ENABLE_METRICS:-false}"
+  ENABLE_ADMIN_API="${ENABLE_ADMIN_API:-}"
+  ENABLE_METRICS="${ENABLE_METRICS:-}"
   ALLOWED_DOMAINS="$(echo "${ALLOWED_DOMAINS:-}" | tr -d '[:space:]')"
 }
 
